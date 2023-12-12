@@ -1,3 +1,4 @@
+#![warn(clippy::pedantic)]
 // https://github.com/bbkane/dotfiles/blob/master/bin_common/bin_common/format_shell_cmd.py
 use std::fmt;
 use std::io::{self, BufRead, Write};
@@ -48,7 +49,7 @@ impl Expr {
     }
 }
 
-impl<'a> Iterator for Iter<'a> {
+impl Iterator for Iter<'_> {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
         while self.end < self.expr.len_expr && self.expr.content[self.end].is_whitespace() {
@@ -59,7 +60,7 @@ impl<'a> Iterator for Iter<'a> {
             return None;
         }
 
-        match self.expr.content[self.end] {
+        match self.expr.content.get(self.end)? {
             '|' => {
                 self.end += 1;
                 let text = self.expr.content[self.start..self.end].iter().collect();
@@ -69,7 +70,7 @@ impl<'a> Iterator for Iter<'a> {
             '-' => {
                 while self.end < self.expr.len_expr && !self.expr.content[self.end].is_whitespace()
                 {
-                    self.end += 1
+                    self.end += 1;
                 }
                 let text = self.expr.content[self.start..self.end].iter().collect();
                 self.start = self.end;
@@ -78,9 +79,11 @@ impl<'a> Iterator for Iter<'a> {
             '"' => {
                 loop {
                     self.end += 1;
-                    if self.end == self.expr.len_expr {
-                        panic!("Double quote at column {} unmatched", self.start)
-                    }
+                    assert!(
+                        self.end != self.expr.len_expr,
+                        "Double quote at column {} unmatched",
+                        self.start
+                    );
                     if self.expr.content[self.end] == '"' {
                         break;
                     }
@@ -93,9 +96,11 @@ impl<'a> Iterator for Iter<'a> {
             '\'' => {
                 loop {
                     self.end += 1;
-                    if self.end == self.expr.len_expr {
-                        panic!("Single quote at column {} unmatched", self.start);
-                    }
+                    assert!(
+                        self.end != self.expr.len_expr,
+                        "Single quote at column {} unmatched",
+                        self.start
+                    );
                     if self.expr.content[self.end] == '\'' {
                         break;
                     }
@@ -126,7 +131,7 @@ impl std::fmt::Display for Expr {
                 Kind::Pipe => write!(f, "|\n    ")?,
                 Kind::Opt => write!(f, "\\\n        {} ", token.text)?,
                 Kind::Cmd | Kind::DoubleQuoteString | Kind::SingleQuoteString => {
-                    write!(f, "{} ", token.text)?
+                    write!(f, "{} ", token.text)?;
                 }
             }
         }
@@ -139,7 +144,7 @@ fn main() -> io::Result<()> {
     if let Some(content) = stdin.lock().lines().next() {
         let content = content?;
         let expr = Expr::new(&content);
-        write!(io::stdout(), "{}", expr)?;
+        write!(io::stdout(), "{expr}")?;
         return Ok(());
     }
     write!(io::stderr(), "No input")?;
