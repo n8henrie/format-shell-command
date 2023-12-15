@@ -52,7 +52,7 @@
           set -x
           input='echo foo | grep o'
           ${pkgs.format-shell-command}/bin/format-shell-command <<<"$input" > $out
-          expected=$'echo foo |\n    grep o '
+          expected=$'echo foo |\n    grep o'
           output=$(cat $out)
           [ "$output" != "$input" ]
           [ "$output" = "$expected" ]
