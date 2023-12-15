@@ -28,7 +28,7 @@
         };
 
         overlays = {
-          default = name;
+          default = self.overlays.${name};
           ${name} = _: _: {
             inherit (self.packages.${system}) name;
           };
