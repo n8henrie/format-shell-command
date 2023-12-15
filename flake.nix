@@ -27,6 +27,13 @@
           };
         };
 
+        overlays = {
+          default = name;
+          ${name} = _: _: {
+            inherit (self.packages.${system}) name;
+          };
+        };
+
         apps.${system}.default = {
           type = "app";
           program = "${self.packages.${system}.${name}}/bin/${name}";
