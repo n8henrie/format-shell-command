@@ -144,7 +144,6 @@ fn main() -> io::Result<()> {
     if let Some(content) = stdin.lock().lines().next() {
         let content = content?;
         let expr = Expr::new(&content).to_string();
-        let expr = expr.trim_end();
         write!(io::stdout(), "{expr}")?;
         return Ok(());
     }
