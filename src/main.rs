@@ -40,7 +40,7 @@ impl Expr {
         let len_expr = content.len();
         Self { content, len_expr }
     }
-    fn iter(&self) -> Iter {
+    fn iter(&self) -> Iter<'_> {
         Iter {
             start: 0,
             end: 0,
